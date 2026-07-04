@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/accounts")
+@RestControllerAdvice
 public class AccountController {
 
     private final AccountService accountService;
@@ -26,6 +27,14 @@ public class AccountController {
         Account account = accountService.createAccount(request.ownerName());
 
         return AccountMapper.toResponse(account);
+    }
+
+    @GetMapping("/{id}")
+    public AccountResponse findById(@PathVariable Long id) {
+
+        Account account = accountService.findById(id);
+        return AccountMapper.toResponse(account);
+
     }
 
 }

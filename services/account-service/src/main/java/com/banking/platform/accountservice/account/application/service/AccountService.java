@@ -1,6 +1,7 @@
 package com.banking.platform.accountservice.account.application.service;
 
 import com.banking.platform.accountservice.account.domain.Account;
+import com.banking.platform.accountservice.account.domain.exception.AccountNotFoundException;
 import com.banking.platform.accountservice.account.infrastruture.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,11 @@ public class AccountService {
 
     private String generateAccountNumber() {
         return String.valueOf(System.currentTimeMillis());
+    }
+
+    public Account findById(Long id) {
+        return accountRepository.findById(id)
+                .orElseThrow(() -> new AccountNotFoundException(id));
     }
 
 }
