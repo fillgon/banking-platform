@@ -1,11 +1,20 @@
 package com.banking.platform.accountservice.account.interfaces.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
+
+import java.math.BigDecimal;
 
 public record CreateAccountRequest(
 
-        @NotBlank
-        String ownerName
+        @NotBlank(message = "O número da conta é obrigatório.")
+        String accountNumber,
+
+        @NotBlank(message = "O nome do titular é obrigatório.")
+        String ownerName,
+
+        @PositiveOrZero(message = "O saldo deve ser maior ou igual a zero.")
+        BigDecimal balance
 
 ) {
 }
