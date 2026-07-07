@@ -4,10 +4,15 @@ import com.banking.platform.accountservice.account.application.service.AccountSe
 import com.banking.platform.accountservice.account.domain.Account;
 import com.banking.platform.accountservice.account.interfaces.dto.AccountResponse;
 import com.banking.platform.accountservice.account.interfaces.dto.CreateAccountRequest;
+import com.banking.platform.accountservice.account.interfaces.dto.PageResponse;
 import com.banking.platform.accountservice.account.interfaces.mapper.AccountMapper;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/accounts")
@@ -34,6 +39,24 @@ public class AccountController {
 
         Account account = accountService.findById(id);
         return AccountMapper.toResponse(account);
+
+    }
+
+    @GetMapping
+    public PageResponse<AccountResponse> findAll(Pageable pageable) {
+
+        Page<Account> accounts = accountService.findAll(pageable);
+
+        return new PageResponse<>(
+                accounts.getContent()
+                        .stream()
+                        .map(AccountMapper::toResponse)
+                        .toList(),
+                accounts.getNumber(),
+                accounts.getSize(),
+                accounts.getTotalElements(),
+                accounts.getTotalPages()
+        );
 
     }
 

@@ -3,10 +3,13 @@ package com.banking.platform.accountservice.account.application.service;
 import com.banking.platform.accountservice.account.domain.Account;
 import com.banking.platform.accountservice.account.domain.exception.AccountNotFoundException;
 import com.banking.platform.accountservice.account.infrastruture.repository.AccountRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class AccountService {
@@ -36,6 +39,10 @@ public class AccountService {
     public Account findById(Long id) {
         return accountRepository.findById(id)
                 .orElseThrow(() -> new AccountNotFoundException(id));
+    }
+
+    public Page<Account> findAll(Pageable pageable) {
+        return accountRepository.findAll(pageable);
     }
 
 }
