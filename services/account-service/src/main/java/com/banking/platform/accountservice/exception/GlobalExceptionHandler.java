@@ -3,6 +3,7 @@ package com.banking.platform.accountservice.exception;
 import com.banking.platform.accountservice.account.domain.exception.AccountNotFoundException;
 import com.banking.platform.accountservice.account.domain.exception.DuplicateAccountException;
 import com.banking.platform.accountservice.account.domain.exception.InsufficientBalanceException;
+import com.banking.platform.accountservice.account.domain.exception.SameAccountTransferException;
 import com.banking.platform.accountservice.exception.dto.ErrorResponse;
 import com.banking.platform.accountservice.exception.dto.FieldErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -58,6 +59,18 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 "INSUFFICIENT_BALANCE",
                 "Saldo insuficente para realizar o saque.",
+                null
+        );
+    }
+
+    @ExceptionHandler(SameAccountTransferException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleSameAccountTransfer(SameAccountTransferException ex) {
+        return new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "SAME_ACCOUNT_TRANSFER",
+                "A conta de origem e a conta de destino devem ser diferentes.",
                 null
         );
     }

@@ -4,6 +4,7 @@ import com.banking.platform.accountservice.account.domain.Account;
 import com.banking.platform.accountservice.account.domain.exception.AccountNotFoundException;
 import com.banking.platform.accountservice.account.domain.exception.DuplicateAccountException;
 import com.banking.platform.accountservice.account.domain.exception.InsufficientBalanceException;
+import com.banking.platform.accountservice.account.domain.exception.SameAccountTransferException;
 import com.banking.platform.accountservice.account.infrastruture.repository.AccountRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -66,7 +67,26 @@ public class AccountService {
 
         account.setBalance(account.getBalance().subtract(amount));
         return account;
+    }
 
+    @Transactional
+    public Account transfer(Long sourceAccountId, Long destinationAccountId, BigDecimal amount) {
+        if (sourceAccountId.equals(destinationAccountId)) {
+            throw new SameAccountTransferException();
+        }
+
+        Account sourceAccount = findById(sourceAccountId);
+        Account destinationAccount = findById(destinationAccountId);
+
+        if (sourceAccount.getBalance().compareTo(amount) < 0) {
+            throw new InsufficientBalanceException();
+        }
+
+        sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount));
+
+        destinationAccount.setBalance(destinationAccount.getBalance().add(amount));
+
+        return sourceAccount;
     }
 
 }

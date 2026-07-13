@@ -70,4 +70,14 @@ public class AccountController {
         return AccountMapper.toResponse(account);
     }
 
+    @PostMapping("/{sourceAccountId}/transfer")
+    public AccountResponse transfer(@PathVariable Long sourceAccountId, @Valid @RequestBody TransferRequest request) {
+        Account sourceAccount = accountService.transfer(
+                sourceAccountId,
+                request.destinationAccountId(),
+                request.amount()
+        );
+        return AccountMapper.toResponse(sourceAccount);
+    }
+
 }
