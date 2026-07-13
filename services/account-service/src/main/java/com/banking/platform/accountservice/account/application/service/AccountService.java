@@ -2,10 +2,12 @@ package com.banking.platform.accountservice.account.application.service;
 
 import com.banking.platform.accountservice.account.domain.Account;
 import com.banking.platform.accountservice.account.domain.exception.AccountNotFoundException;
+import com.banking.platform.accountservice.account.domain.exception.DuplicateAccountException;
 import com.banking.platform.accountservice.account.infrastruture.repository.AccountRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -43,6 +45,14 @@ public class AccountService {
 
     public Page<Account> findAll(Pageable pageable) {
         return accountRepository.findAll(pageable);
+    }
+
+    @Transactional
+    public Account deposit(Long id, BigDecimal amount) {
+     Account account = findById(id);
+
+     account.setBalance(account.getBalance().add(amount));
+        return account;
     }
 
 }

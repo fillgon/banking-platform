@@ -1,6 +1,7 @@
 package com.banking.platform.accountservice.exception;
 
 import com.banking.platform.accountservice.account.domain.exception.AccountNotFoundException;
+import com.banking.platform.accountservice.account.domain.exception.DuplicateAccountException;
 import com.banking.platform.accountservice.exception.dto.ErrorResponse;
 import com.banking.platform.accountservice.exception.dto.FieldErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,16 @@ public class GlobalExceptionHandler {
                 "Dados da requisição inválidos.",
                 errors
         );
-
     }
+
+    public ErrorResponse handleDuplicateAccount(DuplicateAccountException ex) {
+        return new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "ACCOUNT_ALREADY_EXISTS",
+                "Já existe uma conta com esse número.",
+                null
+        );
+    }
+
 }

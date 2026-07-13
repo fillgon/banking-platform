@@ -4,6 +4,7 @@ import com.banking.platform.accountservice.account.application.service.AccountSe
 import com.banking.platform.accountservice.account.domain.Account;
 import com.banking.platform.accountservice.account.interfaces.dto.AccountResponse;
 import com.banking.platform.accountservice.account.interfaces.dto.CreateAccountRequest;
+import com.banking.platform.accountservice.account.interfaces.dto.DepositRequest;
 import com.banking.platform.accountservice.account.interfaces.dto.PageResponse;
 import com.banking.platform.accountservice.account.interfaces.mapper.AccountMapper;
 import jakarta.validation.Valid;
@@ -59,5 +60,11 @@ public class AccountController {
         );
 
     }
+
+    @PostMapping("/{id}/deposit")
+    public AccountResponse deposit(@PathVariable Long id, @Valid @RequestBody DepositRequest request) {
+        Account account = accountService.deposit(id, request.amount());
+        return AccountMapper.toResponse(account);
+    };
 
 }
