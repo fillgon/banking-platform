@@ -2,10 +2,7 @@ package com.banking.platform.accountservice.account.interfaces.controller;
 
 import com.banking.platform.accountservice.account.application.service.AccountService;
 import com.banking.platform.accountservice.account.domain.Account;
-import com.banking.platform.accountservice.account.interfaces.dto.AccountResponse;
-import com.banking.platform.accountservice.account.interfaces.dto.CreateAccountRequest;
-import com.banking.platform.accountservice.account.interfaces.dto.DepositRequest;
-import com.banking.platform.accountservice.account.interfaces.dto.PageResponse;
+import com.banking.platform.accountservice.account.interfaces.dto.*;
 import com.banking.platform.accountservice.account.interfaces.mapper.AccountMapper;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -66,5 +63,11 @@ public class AccountController {
         Account account = accountService.deposit(id, request.amount());
         return AccountMapper.toResponse(account);
     };
+
+    @PostMapping("/{id}/withdraw")
+    public AccountResponse withdraw(@PathVariable Long id, @Valid @RequestBody WithdrawRequest request) {
+        Account account = accountService.withdraw(id, request.amount());
+        return AccountMapper.toResponse(account);
+    }
 
 }

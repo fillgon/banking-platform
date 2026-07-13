@@ -3,6 +3,7 @@ package com.banking.platform.accountservice.account.application.service;
 import com.banking.platform.accountservice.account.domain.Account;
 import com.banking.platform.accountservice.account.domain.exception.AccountNotFoundException;
 import com.banking.platform.accountservice.account.domain.exception.DuplicateAccountException;
+import com.banking.platform.accountservice.account.domain.exception.InsufficientBalanceException;
 import com.banking.platform.accountservice.account.infrastruture.repository.AccountRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -53,6 +54,19 @@ public class AccountService {
 
      account.setBalance(account.getBalance().add(amount));
         return account;
+    }
+
+    @Transactional
+    public Account withdraw(Long id, BigDecimal amount) {
+        Account account = findById(id);
+
+        if (account.getBalance().compareTo(amount) < 0) {
+            throw new InsufficientBalanceException();
+        }
+
+        account.setBalance(account.getBalance().subtract(amount));
+        return account;
+
     }
 
 }

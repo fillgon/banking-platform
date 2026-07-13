@@ -2,6 +2,7 @@ package com.banking.platform.accountservice.exception;
 
 import com.banking.platform.accountservice.account.domain.exception.AccountNotFoundException;
 import com.banking.platform.accountservice.account.domain.exception.DuplicateAccountException;
+import com.banking.platform.accountservice.account.domain.exception.InsufficientBalanceException;
 import com.banking.platform.accountservice.exception.dto.ErrorResponse;
 import com.banking.platform.accountservice.exception.dto.FieldErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -45,6 +46,18 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT.value(),
                 "ACCOUNT_ALREADY_EXISTS",
                 "Já existe uma conta com esse número.",
+                null
+        );
+    }
+
+    @ExceptionHandler(InsufficientBalanceException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInsufficientBalance(InsufficientBalanceException ex) {
+        return new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "INSUFFICIENT_BALANCE",
+                "Saldo insuficente para realizar o saque.",
                 null
         );
     }
