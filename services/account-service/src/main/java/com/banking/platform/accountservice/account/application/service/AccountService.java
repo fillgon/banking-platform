@@ -1,11 +1,14 @@
 package com.banking.platform.accountservice.account.application.service;
 
 import com.banking.platform.accountservice.account.domain.Account;
+import com.banking.platform.accountservice.account.domain.Transaction;
+import com.banking.platform.accountservice.account.domain.TransactionType;
 import com.banking.platform.accountservice.account.domain.exception.AccountNotFoundException;
 import com.banking.platform.accountservice.account.domain.exception.DuplicateAccountException;
 import com.banking.platform.accountservice.account.domain.exception.InsufficientBalanceException;
 import com.banking.platform.accountservice.account.domain.exception.SameAccountTransferException;
 import com.banking.platform.accountservice.account.infrastruture.repository.AccountRepository;
+import com.banking.platform.accountservice.account.infrastruture.repository.TransactionRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,9 +22,11 @@ import java.util.List;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
 
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     public Account createAccount(String ownerName) {
@@ -54,6 +59,16 @@ public class AccountService {
      Account account = findById(id);
 
      account.setBalance(account.getBalance().add(amount));
+
+     transactionRepository.save(
+             Transaction.builder()
+                     .type(TransactionType.DEPOSIT)
+                     .sourceAccountId(account.getId())
+                     .amount(amount)
+                     .createdAt(LocalDateTime.now())
+                     .build()
+     );
+
         return account;
     }
 
@@ -66,6 +81,14 @@ public class AccountService {
         }
 
         account.setBalance(account.getBalance().subtract(amount));
+
+        transactionRepository.save(Transaction.builder()
+                        .type(TransactionType.WITHDRAW)
+                        .sourceAccountId(account.getId())
+                        .amount(amount)
+                .createdAt(LocalDateTime.now())
+                .build());
+
         return account;
     }
 
@@ -85,6 +108,14 @@ public class AccountService {
         sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount));
 
         destinationAccount.setBalance(destinationAccount.getBalance().add(amount));
+
+        transactionRepository.save(Transaction.builder()
+                        .type(TransactionType.TRANSFER)
+                        .sourceAccountId(sourceAccount.getId())
+                        .destinationAccountId(destinationAccount.getId())
+                        .amount(amount)
+                        .createdAt(LocalDateTime.now())
+                .build());
 
         return sourceAccount;
     }

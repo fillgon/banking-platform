@@ -1,6 +1,6 @@
 package com.banking.platform.accountservice.exception;
 
-import com.banking.platform.accountservice.account.domain.exception.AccountNotFoundException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import com.banking.platform.accountservice.account.domain.exception.DuplicateAccountException;
 import com.banking.platform.accountservice.account.domain.exception.InsufficientBalanceException;
 import com.banking.platform.accountservice.account.domain.exception.SameAccountTransferException;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -71,6 +70,18 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 "SAME_ACCOUNT_TRANSFER",
                 "A conta de origem e a conta de destino devem ser diferentes.",
+                null
+        );
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleOptimisticLock(ObjectOptimisticLockingFailureException ex) {
+        return new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "CONCURRENT_UPDATE",
+                "A conta foi alterada por outra operação. Tente novamente.",
                 null
         );
     }
