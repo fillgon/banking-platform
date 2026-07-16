@@ -2,15 +2,16 @@ package com.banking.platform.accountservice.account.interfaces.controller;
 
 import com.banking.platform.accountservice.account.application.service.AccountService;
 import com.banking.platform.accountservice.account.domain.Account;
+import com.banking.platform.accountservice.account.domain.Transaction;
+import com.banking.platform.accountservice.account.domain.TransactionType;
 import com.banking.platform.accountservice.account.interfaces.dto.*;
 import com.banking.platform.accountservice.account.interfaces.mapper.AccountMapper;
+import com.banking.platform.accountservice.account.interfaces.mapper.TransactionMapper;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/accounts")
@@ -79,5 +80,21 @@ public class AccountController {
         );
         return AccountMapper.toResponse(sourceAccount);
     }
+
+    @GetMapping("/{id}/statement")
+    public PageResponse<TransactionResponse> findStatement(@PathVariable Long id, @RequestParam(required = false) TransactionType type, Pageable pageable) {
+        Page<Transaction> transactions = accountService.findStatement(id, type, pageable);
+
+        return new PageResponse<>(
+                transactions.getContent()
+                        .stream()
+                        .map(TransactionMapper::toResponse)
+                        .toList(),
+                transactions.getNumber(),
+                transactions.getSize(),
+                transactions.getTotalElements(),
+                transactions.getTotalPages()
+        );
+    };
 
 }

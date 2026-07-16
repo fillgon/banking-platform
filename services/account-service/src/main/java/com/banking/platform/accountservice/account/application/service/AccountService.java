@@ -120,4 +120,27 @@ public class AccountService {
         return sourceAccount;
     }
 
+    public Page<Transaction> findStatement(
+            Long accountId,
+            TransactionType type,
+            Pageable pageable
+    ) {
+        findById(accountId);
+
+        if (type == null) {
+            return transactionRepository
+                    .findBySourceAccountIdOrDestinationAccountId(
+                            accountId,
+                            accountId,
+                            pageable
+                    );
+        }
+
+        return transactionRepository.findStatementByAccountIdAndType(
+                accountId,
+                type,
+                pageable
+        );
+    }
+
 }
