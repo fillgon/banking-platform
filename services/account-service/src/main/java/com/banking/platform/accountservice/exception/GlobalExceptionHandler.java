@@ -1,5 +1,7 @@
 package com.banking.platform.accountservice.exception;
 
+import com.banking.platform.accountservice.account.domain.exception.InvalidStatementPeriodException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import com.banking.platform.accountservice.account.domain.exception.DuplicateAccountException;
 import com.banking.platform.accountservice.account.domain.exception.InsufficientBalanceException;
@@ -84,6 +86,23 @@ public class GlobalExceptionHandler {
                 "A conta foi alterada por outra operação. Tente novamente.",
                 null
         );
+    }
+
+    @ExceptionHandler(InvalidStatementPeriodException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidStatementPeriod(
+            InvalidStatementPeriodException exception
+    ) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_STATEMENT_PERIOD",
+                exception.getMessage(),
+                null
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorResponse);
     }
 
 }

@@ -10,8 +10,11 @@ import com.banking.platform.accountservice.account.interfaces.mapper.Transaction
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/accounts")
@@ -82,8 +85,13 @@ public class AccountController {
     }
 
     @GetMapping("/{id}/statement")
-    public PageResponse<TransactionResponse> findStatement(@PathVariable Long id, @RequestParam(required = false) TransactionType type, Pageable pageable) {
-        Page<Transaction> transactions = accountService.findStatement(id, type, pageable);
+    public PageResponse<TransactionResponse> findStatement(
+            @PathVariable Long id,
+            @RequestParam(required = false) TransactionType type,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
+            Pageable pageable) {
+        Page<Transaction> transactions = accountService.findStatement(id, type, from, to, pageable);
 
         return new PageResponse<>(
                 transactions.getContent()

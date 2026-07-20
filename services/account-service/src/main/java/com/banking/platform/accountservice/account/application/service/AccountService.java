@@ -3,10 +3,7 @@ package com.banking.platform.accountservice.account.application.service;
 import com.banking.platform.accountservice.account.domain.Account;
 import com.banking.platform.accountservice.account.domain.Transaction;
 import com.banking.platform.accountservice.account.domain.TransactionType;
-import com.banking.platform.accountservice.account.domain.exception.AccountNotFoundException;
-import com.banking.platform.accountservice.account.domain.exception.DuplicateAccountException;
-import com.banking.platform.accountservice.account.domain.exception.InsufficientBalanceException;
-import com.banking.platform.accountservice.account.domain.exception.SameAccountTransferException;
+import com.banking.platform.accountservice.account.domain.exception.*;
 import com.banking.platform.accountservice.account.infrastruture.repository.AccountRepository;
 import com.banking.platform.accountservice.account.infrastruture.repository.TransactionRepository;
 import org.springframework.data.domain.Page;
@@ -123,22 +120,50 @@ public class AccountService {
     public Page<Transaction> findStatement(
             Long accountId,
             TransactionType type,
+            LocalDateTime from,
+            LocalDateTime to,
             Pageable pageable
     ) {
         findById(accountId);
 
-        if (type == null) {
+        boolean onlyFromProvided = from != null && to == null;
+        boolean onlyToProvided = from == null && to != null;
+
+        if (onlyFromProvided || onlyToProvided) {
+            throw new InvalidStatementPeriodException();
+        }
+
+        if (type != null && from != null) {
             return transactionRepository
-                    .findBySourceAccountIdOrDestinationAccountId(
+                    .findStatementByAccountIdTypeAndPeriod(
                             accountId,
-                            accountId,
+                            type,
+                            from,
+                            to,
                             pageable
                     );
         }
 
-        return transactionRepository.findStatementByAccountIdAndType(
+        if (type != null) {
+            return transactionRepository.findStatementByAccountIdAndType(
+                    accountId,
+                    type,
+                    pageable
+            );
+        }
+
+        if (from != null) {
+            return transactionRepository.findStatementByAccountIdAndPeriod(
+                    accountId,
+                    from,
+                    to,
+                    pageable
+            );
+        }
+
+        return transactionRepository.findBySourceAccountIdOrDestinationAccountId(
                 accountId,
-                type,
+                accountId,
                 pageable
         );
     }
