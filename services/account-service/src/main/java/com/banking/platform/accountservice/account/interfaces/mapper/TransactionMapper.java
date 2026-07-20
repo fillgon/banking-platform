@@ -15,6 +15,10 @@ public class TransactionMapper {
                 transaction.getSourceAccountId(),
                 transaction.getDestinationAccountId(),
                 transaction.getAmount(),
+                transaction.getSourceBalanceBefore(),
+                transaction.getSourceBalanceAfter(),
+                transaction.getDestinationBalanceBefore(),
+                transaction.getDestinationBalanceAfter(),
                 transaction.getCreatedAt()
         );
 

@@ -6,14 +6,15 @@ import com.banking.platform.accountservice.account.domain.TransactionType;
 import com.banking.platform.accountservice.account.domain.exception.*;
 import com.banking.platform.accountservice.account.infrastruture.repository.AccountRepository;
 import com.banking.platform.accountservice.account.infrastruture.repository.TransactionRepository;
+import com.banking.platform.accountservice.account.infrastruture.specification.TransactionSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class AccountService {
@@ -54,6 +55,7 @@ public class AccountService {
     @Transactional
     public Account deposit(Long id, BigDecimal amount) {
      Account account = findById(id);
+     BigDecimal balanceBefore = account.getBalance();
 
      account.setBalance(account.getBalance().add(amount));
 
@@ -62,6 +64,8 @@ public class AccountService {
                      .type(TransactionType.DEPOSIT)
                      .sourceAccountId(account.getId())
                      .amount(amount)
+                     .sourceBalanceBefore(balanceBefore)
+                     .sourceBalanceAfter(account.getBalance())
                      .createdAt(LocalDateTime.now())
                      .build()
      );
@@ -77,14 +81,18 @@ public class AccountService {
             throw new InsufficientBalanceException();
         }
 
+        BigDecimal balanceBefore = account.getBalance();
+
         account.setBalance(account.getBalance().subtract(amount));
 
         transactionRepository.save(Transaction.builder()
                         .type(TransactionType.WITHDRAW)
                         .sourceAccountId(account.getId())
                         .amount(amount)
-                .createdAt(LocalDateTime.now())
-                .build());
+                        .sourceBalanceBefore(balanceBefore)
+                        .sourceBalanceAfter(account.getBalance())
+                        .createdAt(LocalDateTime.now())
+                        .build());
 
         return account;
     }
@@ -102,8 +110,10 @@ public class AccountService {
             throw new InsufficientBalanceException();
         }
 
-        sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount));
+        BigDecimal sourceBalanceBefore = sourceAccount.getBalance();
+        BigDecimal destinationBalanceBefore = destinationAccount.getBalance();
 
+        sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount));
         destinationAccount.setBalance(destinationAccount.getBalance().add(amount));
 
         transactionRepository.save(Transaction.builder()
@@ -111,6 +121,10 @@ public class AccountService {
                         .sourceAccountId(sourceAccount.getId())
                         .destinationAccountId(destinationAccount.getId())
                         .amount(amount)
+                        .sourceBalanceBefore(sourceBalanceBefore)
+                        .sourceBalanceAfter(sourceAccount.getBalance())
+                        .destinationBalanceBefore(destinationBalanceBefore)
+                        .destinationBalanceAfter(destinationAccount.getBalance())
                         .createdAt(LocalDateTime.now())
                 .build());
 
@@ -133,39 +147,14 @@ public class AccountService {
             throw new InvalidStatementPeriodException();
         }
 
-        if (type != null && from != null) {
-            return transactionRepository
-                    .findStatementByAccountIdTypeAndPeriod(
-                            accountId,
-                            type,
-                            from,
-                            to,
-                            pageable
-                    );
-        }
+        Specification<Transaction> specification =
+                Specification
+                        .where(TransactionSpecification.belongsToAccount(accountId))
+                        .and(TransactionSpecification.hasType(type)
+                        .and(TransactionSpecification.createdBetween(from, to)));
 
-        if (type != null) {
-            return transactionRepository.findStatementByAccountIdAndType(
-                    accountId,
-                    type,
-                    pageable
-            );
-        }
+        return transactionRepository.findAll(specification, pageable);
 
-        if (from != null) {
-            return transactionRepository.findStatementByAccountIdAndPeriod(
-                    accountId,
-                    from,
-                    to,
-                    pageable
-            );
-        }
-
-        return transactionRepository.findBySourceAccountIdOrDestinationAccountId(
-                accountId,
-                accountId,
-                pageable
-        );
     }
 
 }

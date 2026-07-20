@@ -11,6 +11,10 @@ public record TransactionResponse(
         Long sourceAccountId,
         Long destinationAccountId,
         BigDecimal amount,
+        BigDecimal sourceBalanceBefore,
+        BigDecimal sourceBalanceAfter,
+        BigDecimal destinationBalanceBefore,
+        BigDecimal destinationBalanceAfter,
         LocalDateTime createdAt
 ) {
 }

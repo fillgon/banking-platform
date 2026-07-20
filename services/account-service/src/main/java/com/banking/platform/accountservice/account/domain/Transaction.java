@@ -33,4 +33,9 @@ public class Transaction {
 
     @Column(nullable=false)
     private LocalDateTime createdAt;
+
+    private BigDecimal sourceBalanceBefore;
+    private BigDecimal sourceBalanceAfter;
+    private BigDecimal destinationBalanceBefore;
+    private BigDecimal destinationBalanceAfter;
 }
