@@ -31,6 +31,8 @@ public class Account {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    private LocalDateTime updatedAt;
+
     @Version
     @Column(nullable = false)
     private Long version;
